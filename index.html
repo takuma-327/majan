@@ -22,33 +22,35 @@
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background: var(--bg-color); color: var(--text); padding-bottom: 60px; line-height: 1.5; }
+    body { background: var(--bg-color); color: var(--text); padding-bottom: 60px; line-height: 1.6; }
 
     header {
       text-align: center;
-      padding: 1.5rem;
+      padding: 1.5rem 1rem;
       background: var(--card-bg);
       border-bottom: 2px solid var(--card-border);
     }
-    header h1 { font-size: 1.6rem; color: var(--accent); }
+    header h1 { font-size: 1.5rem; color: var(--accent); margin-bottom: 4px; }
+    header p { font-size: 0.85rem; color: var(--text-muted); }
 
     /* ナビゲーション */
     nav {
       display: flex;
-      justify-content: center;
+      justify-content: flex-start;
       background: #1e293b;
       border-bottom: 1px solid var(--card-border);
       overflow-x: auto;
+      white-space: nowrap;
+      scrollbar-width: thin;
     }
     nav button {
-      padding: 14px 20px;
+      padding: 12px 18px;
       border: none;
       background: none;
       color: var(--text-muted);
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       font-weight: bold;
       cursor: pointer;
-      white-space: nowrap;
       transition: 0.2s;
     }
     nav button.active {
@@ -57,57 +59,58 @@
       border-bottom: 3px solid var(--accent);
     }
 
-    .container { max-width: 1000px; margin: 24px auto; padding: 0 16px; }
+    .container { max-width: 1060px; margin: 20px auto; padding: 0 16px; }
     .tab-content { display: none; }
     .tab-content.active { display: block; }
 
-    /* 牌のビジュアルスタイル */
+    /* 牌の共通デザイン */
     .tile {
       display: inline-flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      width: 42px;
-      height: 58px;
+      width: 38px;
+      height: 52px;
       background: var(--tile-bg);
       border: 1px solid #ddd;
-      border-radius: 5px;
-      box-shadow: 2px 3px 0px var(--tile-shadow), 0 3px 5px rgba(0,0,0,0.4);
+      border-radius: 4px;
+      box-shadow: 2px 2px 0px var(--tile-shadow), 0 3px 4px rgba(0,0,0,0.3);
       color: #111;
       font-weight: bold;
       user-select: none;
-      cursor: pointer;
       position: relative;
-      margin: 2px;
-      transition: transform 0.15s, box-shadow 0.15s;
+      margin: 1.5px;
+      flex-shrink: 0;
     }
-    .tile:hover { transform: translateY(-3px); }
+    .tile.interactive { cursor: pointer; transition: transform 0.15s; }
+    .tile.interactive:hover { transform: translateY(-3px); }
     .tile.recommend {
-      box-shadow: 0 0 14px #38bdf8, 2px 3px 0px var(--tile-shadow);
+      box-shadow: 0 0 12px #38bdf8, 2px 2px 0px var(--tile-shadow);
       border: 2px solid #0ea5e9;
       animation: pulse 1s infinite alternate;
     }
     @keyframes pulse {
       from { transform: translateY(0); }
-      to { transform: translateY(-6px); }
+      to { transform: translateY(-5px); }
     }
-    .tile .suit { font-size: 0.65rem; }
-    .tile .val { font-size: 1.15rem; line-height: 1.1; }
+    .tile .suit { font-size: 0.6rem; }
+    .tile .val { font-size: 1.05rem; line-height: 1.05; }
     .tile.red { color: #dc2626; }
     .tile.green { color: #16a34a; }
     .tile.blue { color: #2563eb; }
 
-    .tile-group {
+    .tile-hand {
       display: inline-flex;
+      flex-wrap: wrap;
       background: rgba(0,0,0,0.25);
-      padding: 4px;
+      padding: 6px 8px;
       border-radius: 6px;
-      margin: 4px 6px;
+      margin: 6px 0;
       align-items: center;
+      gap: 1px;
     }
-    .tile-group-title { font-size: 0.75rem; color: var(--accent); margin-right: 4px; writing-mode: vertical-rl; }
 
-    /* カード・解説スタイル */
+    /* 解説ボックス */
     .card-box {
       background: var(--card-bg);
       border-radius: 8px;
@@ -116,25 +119,36 @@
       border: 1px solid var(--card-border);
     }
     .card-box h2 { font-size: 1.25rem; margin-bottom: 12px; color: var(--accent); }
-    .card-box h3 { font-size: 1.05rem; margin: 14px 0 8px; color: #cbd5e1; }
-    .card-box p { color: #cbd5e1; margin-bottom: 10px; }
+    .card-box h3 { font-size: 1.05rem; margin: 16px 0 8px; color: #f1f5f9; }
+    .card-box p { color: #cbd5e1; margin-bottom: 10px; font-size: 0.95rem; }
 
-    .bad-example {
-      border-left: 4px solid var(--danger);
-      background: rgba(239, 68, 68, 0.1);
-      padding: 12px;
-      border-radius: 0 6px 6px 0;
-      margin: 10px 0;
+    .notice-box {
+      padding: 12px 16px;
+      border-radius: 6px;
+      margin: 10px 0 16px;
+      font-size: 0.9rem;
+      border-left: 4px solid;
     }
-    .good-example {
-      border-left: 4px solid var(--success);
-      background: rgba(16, 185, 129, 0.1);
-      padding: 12px;
-      border-radius: 0 6px 6px 0;
-      margin: 10px 0;
-    }
+    .notice-danger { background: rgba(239, 68, 68, 0.1); border-color: var(--danger); }
+    .notice-success { background: rgba(16, 185, 129, 0.1); border-color: var(--success); }
+    .notice-info { background: rgba(56, 189, 248, 0.1); border-color: var(--accent); }
 
-    /* 役・用語フィルターとフラッシュカード */
+    /* テーブル */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0;
+      font-size: 0.9rem;
+    }
+    .data-table th, .data-table td {
+      border: 1px solid var(--card-border);
+      padding: 8px 12px;
+      text-align: left;
+    }
+    .data-table th { background: #334155; color: #fff; }
+    .data-table td { background: rgba(0,0,0,0.2); }
+
+    /* フィルターボタン */
     .filter-bar {
       display: flex;
       gap: 8px;
@@ -156,69 +170,89 @@
       font-weight: bold;
     }
 
+    /* 視覚的役一覧 (図鑑形式) */
+    .yaku-catalog-item {
+      background: rgba(0,0,0,0.2);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 14px;
+      margin-bottom: 14px;
+    }
+    .yaku-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+    .yaku-title { font-size: 1.1rem; font-weight: bold; color: #fff; }
+    .badge {
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+    .badge-menzen { background: #6366f1; color: #fff; }
+    .badge-naki { background: #0284c7; color: #fff; }
+    .badge-han { background: #f59e0b; color: #000; margin-right: 6px; }
+
+    /* フラッシュカードグリッド */
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
       gap: 16px;
     }
     .flashcard {
       background: #1e293b;
       border: 1px solid var(--card-border);
       border-radius: 8px;
-      min-height: 160px;
+      min-height: 190px;
       padding: 16px;
       cursor: pointer;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      position: relative;
       transition: background 0.2s, border-color 0.2s;
     }
     .flashcard:hover { border-color: var(--accent); background: #243248; }
-    .flashcard .meta {
+    .flashcard .front {
       display: flex;
+      flex-direction: column;
+      height: 100%;
       justify-content: space-between;
-      font-size: 0.75rem;
-      color: var(--text-muted);
     }
-    .flashcard .front-title { font-size: 1.25rem; font-weight: bold; color: #fff; margin: auto 0; text-align: center; }
-    .flashcard .back-desc { font-size: 0.85rem; color: #cbd5e1; display: none; line-height: 1.45; }
-    .flashcard.flipped .front-title { display: none; }
-    .flashcard.flipped .back-desc { display: block; }
-    .badge {
-      display: inline-block;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-size: 0.7rem;
-      font-weight: bold;
+    .flashcard .back { display: none; height: 100%; }
+    .flashcard.flipped .front { display: none; }
+    .flashcard.flipped .back {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
     }
-    .badge-menzen { background: #7c3aed; color: #fff; }
-    .badge-naki { background: #0284c7; color: #fff; }
 
     /* 雀卓UI */
     .mahjong-table {
       background: var(--table-mat);
       border: 8px solid #2d1810;
       border-radius: 12px;
-      padding: 20px;
+      padding: 16px;
       display: flex;
       flex-direction: column;
-      gap: 18px;
+      gap: 14px;
       box-shadow: inset 0 0 30px rgba(0,0,0,0.7);
     }
     .river {
-      min-height: 90px;
+      min-height: 80px;
       background: rgba(0,0,0,0.25);
       border-radius: 6px;
-      padding: 8px;
+      padding: 6px;
       display: flex;
       flex-wrap: wrap;
-      gap: 3px;
+      gap: 2px;
     }
     .hand-area {
       background: rgba(0,0,0,0.35);
-      padding: 14px;
+      padding: 12px;
       border-radius: 8px;
+      overflow-x: auto;
     }
     .table-info {
       display: flex;
@@ -228,13 +262,14 @@
       padding: 8px 12px;
       background: rgba(0,0,0,0.5);
       border-radius: 6px;
+      font-size: 0.9rem;
     }
     .reason-box {
-      background: rgba(15, 23, 42, 0.85);
+      background: rgba(15, 23, 42, 0.9);
       border-left: 4px solid var(--accent);
       padding: 10px 14px;
       border-radius: 4px;
-      font-size: 0.9rem;
+      font-size: 0.88rem;
       color: #e2e8f0;
       margin-top: 10px;
     }
@@ -254,111 +289,192 @@
 
 <header>
   <h1>ゼロから始める麻雀学習ポータル</h1>
+  <p>ルールの基本サイクルから全役の視覚的理解、アシスト付き実践まで完全網羅</p>
 </header>
 
 <nav>
-  <button class="active" onclick="switchTab('tiles')">1. 全34種 牌一覧</button>
-  <button onclick="switchTab('goal')">2. ゴール形(例3つ) & 鳴き</button>
-  <button onclick="switchTab('yaku')">3. 全役一覧カード</button>
-  <button onclick="switchTab('game')">4. 理由がわかる実戦対戦</button>
+  <button class="active" onclick="switchTab('basics')">1. 超基本・ゲーム進行</button>
+  <button onclick="switchTab('tiles')">2. 牌の種類 & パズル3形</button>
+  <button onclick="switchTab('catalog')">3. 全役ビジュアル図鑑</button>
+  <button onclick="switchTab('flashcards')">4. 役暗記カード</button>
+  <button onclick="switchTab('game')">5. 理由がわかる実戦対局</button>
 </nav>
 
 <div class="container">
 
-  <div id="tab-tiles" class="tab-content active">
+  <!-- タブ1: 超基本・ゲーム進行 -->
+  <div id="tab-basics" class="tab-content active">
     <div class="card-box">
-      <h2>麻雀牌は全34種類・各4枚（合計136枚）</h2>
-      <p>手牌はこれらの中から13枚（ツモ時14枚）を持って戦います。全種類が頭に入ると手牌の整理が一気に速くなります。</p>
+      <h2>麻雀の超基本：手牌の枚数はいくつ？</h2>
+      <p>麻雀は<strong>「13枚持っている手牌に、1枚引いて14枚にし、要らない1枚を捨てて13枚に戻す」</strong>という呼吸を時計回りに繰り返すゲームです。</p>
+      
+      <div class="notice-info">
+        <strong>手牌サイクルの鉄則：</strong><br>
+        1. 自分の番が来たら山から1枚引く（手元は<strong>14枚</strong>になる）<br>
+        2. パズルが完成していれば「ツモ！」と言ってアガリ<br>
+        3. 完成していなければ、最も不要な<strong>1枚を選んで捨てる</strong>（手元は<strong>13枚</strong>に戻る）
+      </div>
+    </div>
 
-      <h3>① 萬子（マンズ）- 漢数字の牌 (9種 × 各4枚 = 36枚)</h3>
+    <div class="card-box">
+      <h2>捨てた牌を取れる条件（チー・ポン・ロン）と相手の制限</h2>
+      <p>他人が捨てた牌を拾って自分のものにできますが、誰からでも取れるわけではありません。</p>
+
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>行動</th>
+            <th>拾える相手</th>
+            <th>拾う条件</th>
+            <th>目的</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>チー</strong></td>
+            <td><span style="color:var(--warning); font-weight:bold;">左隣の人（上家）からのみ</span></td>
+            <td>手持ち2枚と合わせて「連番3枚」ができる時</td>
+            <td>階段のセット（順子）を高速で作る</td>
+          </tr>
+          <tr>
+            <td><strong>ポン</strong></td>
+            <td>誰からでもOK（3人全員対象）</td>
+            <td>手持ちに「同じ牌が2枚」ある時</td>
+            <td>同じ牌3枚セット（刻子）を確定させる</td>
+          </tr>
+          <tr>
+            <td><strong>ロン</strong></td>
+            <td>誰からでもOK（3人全員対象）</td>
+            <td>その牌が出れば「パズルが14枚で完成」する時</td>
+            <td>人の牌を奪って即座に勝つ（アガリ）</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>捨て牌を取られた側のデメリット（なぜ警戒が必要なのか？）</h3>
+      <div class="notice-danger">
+        <strong>① ポン・チーされた時のデメリット：</strong><br>
+        ・相手の手牌が揃うスピードをあなたがアシストしてしまった状態になります。<br>
+        ・鳴かれた牌の種類から、相手に「タンヤオ」「役牌」などの役を確定させてしまいます。
+      </div>
+      <div class="notice-danger">
+        <strong>② ロンされた時の最大デメリット（放銃 / 振り込み）：</strong><br>
+        ・他人は1円も払わず、<strong>当たり牌を捨てたあなた1人が相手のアガリ点数を全額支払う（一人負け）</strong>ことになります。<br>
+        ※麻雀で勝つための最重要技術は「相手にロンされない牌を捨てる（オリる）」ことです。
+      </div>
+    </div>
+
+    <div class="card-box">
+      <h2>立直（リーチ）ができる4大条件</h2>
+      <p>リーチは麻雀で最も強力な役ですが、以下の4つの条件をすべて満たさないと宣言できません。</p>
+      <ul style="margin-left: 20px; color: #cbd5e1;">
+        <li><strong>条件1：門前（メンゼン）であること</strong> - チー・ポン・明カンを一度もしていない。</li>
+        <li><strong>条件2：テンパイ（聴牌）していること</strong> - あと1枚くれば14枚のパズルが完成する状態。</li>
+        <li><strong>条件3：点数が1,000点以上あること</strong> - 卓の中央に供託金として1,000点棒を差し出す必要があります。</li>
+        <li><strong>条件4：残りの山牌が3枚以上あること</strong> - 自分のツモ番がもう残っていない時は宣言できません。</li>
+      </ul>
+      <p style="margin-top:10px; color:var(--warning);"><strong>※リーチ宣言後の制約：</strong>以降は手牌を入れ替えられなくなります。引いた牌がアガリ牌でなければ、すべてそのまま自動的に捨てなければなりません。</p>
+    </div>
+
+    <div class="card-box">
+      <h2>役と点数の目安 & 頻出役の一般論</h2>
+      <p>複雑な計算は最初覚える必要ありません。まずは以下の大まかな基準を押さえましょう。</p>
+      
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>ランク</th>
+            <th>飜数（役の合計）</th>
+            <th>点数（子のロン時）</th>
+            <th>感覚</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>1飜</td><td>役1つ</td><td>約 1,000 点</td><td>小アガリ。手牌を安く早く流す</td></tr>
+          <tr><td>2飜</td><td>役2つ</td><td>約 2,000 点</td><td>リーチ＋タンヤオなど基本パターン</td></tr>
+          <tr><td>3飜</td><td>役3つ</td><td>約 4,000 点</td><td>まとまった打点</td></tr>
+          <tr><td><strong>満貫 (マンガン)</strong></td><td>4〜5飜</td><td><strong>約 8,000 点</strong></td><td>初心者がまず目指すべき大技の基準</td></tr>
+          <tr><td>跳満 (ハネマン)</td><td>6〜7飜</td><td>約 12,000 点</td><td>満貫の1.5倍の破壊力</td></tr>
+          <tr><td>役満 (ヤクマン)</td><td>最高難度</td><td>32,000 点</td><td>出たらゲームが終了する一撃必殺</td></tr>
+        </tbody>
+      </table>
+
+      <div class="notice-success">
+        <strong style="font-size: 1rem;">【重要：全アガリの約80%を占める「BIG 4」】</strong><br>
+        麻雀には数十種類の役がありますが、実際の対局でアガられる役の8割近くは以下の4つだけで構成されています。<br>
+        <strong>1. リーチ（約42%）</strong>：鳴かずに揃えてリーチを打つ。<br>
+        <strong>2. 役牌（約31%）</strong>：白・發・中・自風を3枚集める。<br>
+        <strong>3. タンヤオ（約22%）</strong>：2〜8の数牌だけで揃える。<br>
+        <strong>4. ピンフ（約20%）</strong>：階段4組＋両面待ち。<br>
+        ※初心者は難しい役を狙わず、<strong>「まず鳴かずにリーチを目指す」「白・發・中があればポンする」</strong>の2点だけに集中するのが最短の上達法です。
+      </div>
+    </div>
+  </div>
+
+  <!-- タブ2: 牌の種類 & パズル3形 -->
+  <div id="tab-tiles" class="tab-content">
+    <div class="card-box">
+      <h2>全34種類の牌一覧（各4枚・合計136枚）</h2>
+      <h3>① 萬子（マンズ）：漢数字</h3>
       <div id="tiles-m"></div>
-
-      <h3>② 筒子（ピンズ）- 丸・車輪の牌 (9種 × 各4枚 = 36枚)</h3>
+      <h3>② 筒子（ピンズ）：丸・車輪</h3>
       <div id="tiles-p"></div>
-
-      <h3>③ 索子（ソーズ）- 竹・鳥の牌 (9種 × 各4枚 = 36枚)</h3>
-      <p style="font-size: 0.85rem; color: var(--text-muted);">※1索は多くのセットで「鳥（孔雀など）」が描かれています。</p>
+      <h3>③ 索子（ソーズ）：竹（1索は鳥）</h3>
       <div id="tiles-s"></div>
-
-      <h3>④ 字牌（ツーパイ）- 漢字の牌 (7種 × 各4枚 = 28枚)</h3>
-      <p style="font-size: 0.85rem; color: var(--text-muted);">東・南・西・北を「風牌（フォンパイ）」、白・發・中を「三元牌（サンゲンパイ）」と呼びます。</p>
+      <h3>④ 字牌（ツーパイ）：漢字</h3>
       <div id="tiles-z"></div>
     </div>
-  </div>
-
-  <div id="tab-goal" class="tab-content">
-    <div class="card-box">
-      <h2>麻雀のゴール：パズルを完成させる（代表的な3つの形）</h2>
-      <p>麻雀のアガリ形は、99%が「基本形」ですが、例外として2つの「特殊な形」が存在します。</p>
-
-      <h3 style="color: var(--accent);">例①：基本形（4面子 ＋ 1雀頭） - 全アガリの99%</h3>
-      <p>3枚セット（階段の「シュンツ」または同じ牌3枚「コーツ」）を4組 ＋ 同じ牌2枚（アタマ）の計14枚。</p>
-      <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px;">
-        <div class="tile-group"><span class="tile-group-title">順子</span><span id="ex1-m1"></span></div>
-        <div class="tile-group"><span class="tile-group-title">順子</span><span id="ex1-m2"></span></div>
-        <div class="tile-group"><span class="tile-group-title">刻子</span><span id="ex1-m3"></span></div>
-        <div class="tile-group"><span class="tile-group-title">順子</span><span id="ex1-m4"></span></div>
-        <div class="tile-group" style="border: 1px solid var(--accent);"><span class="tile-group-title">雀頭</span><span id="ex1-head"></span></div>
-      </div>
-
-      <h3 style="color: var(--warning); margin-top: 24px;">例②：七対子（チートイツ） - 例外その1</h3>
-      <p>面子を作らず、「ペア（同じ牌2枚）を7組」集める特殊形。4枚同じ牌を2ペアとして使うことはできません。</p>
-      <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px;" id="ex2-container"></div>
-
-      <h3 style="color: var(--danger); margin-top: 24px;">例③：国士無双（コクシムソウ） - 例外その2（最高峰・役満）</h3>
-      <p>端っこ牌（1・9）と字牌（全13種類）を1枚ずつ揃え、その中のどれか1種類だけを2枚（アタマ）にする究極のバラバラ形。</p>
-      <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px;" id="ex3-container"></div>
-    </div>
 
     <div class="card-box">
-      <h2>「鳴き」（ポン・チー・カン）の真実</h2>
-      <p>他人の捨て牌をもらって早く手牌を揃える行為ですが、<strong>初心者が最も負ける原因</strong>でもあります。</p>
+      <h2>パズルの完成形3パターン</h2>
+      <p>14枚のアガリ形は、以下の3つの型のいずれかになります。</p>
+      
+      <h3 style="color:var(--accent);">パターン1：基本形（4面子 ＋ 1雀頭） - 全アガリの99%</h3>
+      <p>「階段3枚 or 同牌3枚」が4組 ＋「同じ牌2枚」が1組。</p>
+      <div class="tile-hand" id="pattern-basic"></div>
 
-      <div class="bad-example">
-        <strong style="color: var(--danger);">【初心者が最もハマる失敗談：役なしチョンボ】</strong><br>
-        「揃いそうだから」と適当に数牌のチーやポンを連発。手牌14枚が揃って「ロン！」と言ったものの、<strong>役が1つも無いためアガれず、ルール違反（チョンボで罰点）</strong>になる。<br>
-        ※鳴くと「リーチ」が使えなくなるため、意図して特定の役を作らないとアガれません。
-      </div>
+      <h3 style="color:var(--warning); margin-top:16px;">パターン2：七対子（チートイツ） - 例外その1</h3>
+      <p>面子を作らず、「同じ牌2枚」のペアを7組集める。</p>
+      <div class="tile-hand" id="pattern-chitoi"></div>
 
-      <div class="bad-example">
-        <strong style="color: var(--danger);">【初心者が最もハマる失敗談：防御崩壊】</strong><br>
-        3回鳴いて手牌が残り2枚（または5枚）になった瞬間、相手からリーチ。捨てる安全牌が手元に全く残っておらず、相手の当たり牌を掴まされて大失点する。
-      </div>
-
-      <div class="good-example">
-        <strong style="color: var(--success);">【上級者・プロが鳴く明確な基準】</strong><br>
-        上級者が鳴くのは基本的に以下のケースだけです：
-        <ul style="margin-left: 20px; margin-top: 6px;">
-          <li><strong>役牌（白・發・中・自風・場風）が2枚ある時：</strong> 鳴けば3枚組になり、それだけで「1役」確定する。</li>
-          <li><strong>タンヤオ（2〜8の数牌だけ）がほぼ確定している時：</strong> 1・9・字牌を完全に排除できている。</li>
-          <li><strong>ドラが3枚以上あり、スピード優先で押し切りたい時：</strong> 役牌などを鳴いて素早く高打点を回収する。</li>
-        </ul>
-        <strong>鉄則：手の中に役の目処が立たない時は、絶対に鳴いてはいけません。</strong>
-      </div>
+      <h3 style="color:var(--danger); margin-top:16px;">パターン3：国士無双（コクシムソウ） - 例外その2</h3>
+      <p>1・9・字牌の全13種を1枚ずつ揃え、どれか1種だけペアにする究極形。</p>
+      <div class="tile-hand" id="pattern-kokushi"></div>
     </div>
   </div>
 
-  <div id="tab-yaku" class="tab-content">
+  <!-- タブ3: 全役ビジュアル図鑑 -->
+  <div id="tab-catalog" class="tab-content">
     <div class="card-box">
-      <h2>全役フラッシュカード一覧（カードをクリックで詳細表示）</h2>
+      <h2>全役ビジュアル図鑑</h2>
+      <p>実際のアガリ手牌（14枚）の並びを見ながら役の構造を覚えましょう。</p>
       <div class="filter-bar">
-        <button class="filter-btn active" onclick="filterYaku('all')">すべて</button>
-        <button class="filter-btn" onclick="filterYaku('1han')">1飜 (最頻出)</button>
-        <button class="filter-btn" onclick="filterYaku('2han')">2飜</button>
-        <button class="filter-btn" onclick="filterYaku('3-6han')">3〜6飜</button>
-        <button class="filter-btn" onclick="filterYaku('yakuman')">役満 (最高役)</button>
-        <button class="filter-btn" onclick="filterYaku('special')">特殊形</button>
+        <button class="filter-btn active" onclick="filterCatalog('all')">全役表示</button>
+        <button class="filter-btn" onclick="filterCatalog('1han')">1飜 (頻出)</button>
+        <button class="filter-btn" onclick="filterCatalog('2han')">2飜</button>
+        <button class="filter-btn" onclick="filterCatalog('3-6han')">3〜6飜</button>
+        <button class="filter-btn" onclick="filterCatalog('yakuman')">役満</button>
       </div>
-      <div class="grid" id="yaku-container"></div>
+      <div id="catalog-container"></div>
     </div>
   </div>
 
+  <!-- タブ4: 役暗記カード -->
+  <div id="tab-flashcards" class="tab-content">
+    <div class="card-box">
+      <h2>役当て・暗記フラッシュカード</h2>
+      <p>手牌のビジュアルを見て「何の役か？」を考え、カードをクリックして答え合わせをしてください。</p>
+      <div class="grid" id="flashcard-container"></div>
+    </div>
+  </div>
+
+  <!-- タブ5: 実戦対局 -->
   <div id="tab-game" class="tab-content">
-    <div class="card-box" style="padding: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+    <div class="card-box" style="padding:12px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
       <div>
-        <label style="cursor: pointer;">
+        <label style="cursor:pointer;">
           <input type="checkbox" id="assist-mode" checked onchange="renderGame()">
-          <strong>アシスト機能（推奨牌を光らせ、理由を表示）</strong>
+          <strong>初心補助モード（推奨牌を光らせ、AIの判断理由を表示）</strong>
         </label>
       </div>
       <button class="btn" onclick="startNewGame()">対局をリセット</button>
@@ -373,8 +489,8 @@
       <div>
         <div class="river" id="player-river"></div>
         <div class="table-info" style="margin-top: 10px;">
-          <span>あなたの手牌</span>
-          <span id="player-status" style="color: var(--accent);">あなたのツモ番です</span>
+          <span>あなたの手牌 (クリックで捨てる牌を選択)</span>
+          <span id="player-status" style="color:var(--accent);">あなたのツモ番です</span>
         </div>
         <div class="hand-area" id="player-hand" style="margin-top: 8px;"></div>
         <div id="reason-display" class="reason-box" style="display:none;"></div>
@@ -385,7 +501,7 @@
 </div>
 
 <script>
-// ==================== 牌の定義 ====================
+// ==================== 牌データ定義 ====================
 const TILES_DEF = {
   m: { name: '萬', color: 'red', chars: ['一','二','三','四','五','六','七','八','九'] },
   p: { name: '筒', color: 'blue', chars: ['①','②','③','④','⑤','⑥','⑦','⑧','⑨'] },
@@ -398,10 +514,15 @@ function createTileElement(tileStr, onClick = null, recommend = false) {
   const num = parseInt(tileStr[1], 10);
   const def = TILES_DEF[suit];
   const el = document.createElement('div');
-  el.className = `tile ${def.color} ${recommend ? 'recommend' : ''}`;
+  el.className = `tile ${def.color} ${recommend ? 'recommend' : ''} ${onClick ? 'interactive' : ''}`;
   el.innerHTML = `<span class="val">${def.chars[num - 1]}</span><span class="suit">${def.name}</span>`;
   if (onClick) el.onclick = onClick;
   return el;
+}
+
+function renderTileArray(container, tileArray) {
+  container.innerHTML = '';
+  tileArray.forEach(t => container.appendChild(createTileElement(t)));
 }
 
 // ==================== タブ切り替え ====================
@@ -413,134 +534,215 @@ function switchTab(tabId) {
   if (tabId === 'game' && !gameState.started) startNewGame();
 }
 
-// ==================== 1. 全牌の描画 ====================
-function renderAllTiles() {
-  ['m','p','s'].forEach(suit => {
-    const div = document.getElementById(`tiles-${suit}`);
+// ==================== 牌一覧・完成形描画 ====================
+function initTilesAndPatterns() {
+  ['m','p','s'].forEach(s => {
+    const div = document.getElementById(`tiles-${s}`);
     div.innerHTML = '';
-    for (let i = 1; i <= 9; i++) {
-      div.appendChild(createTileElement(suit + i));
-    }
+    for (let i = 1; i <= 9; i++) div.appendChild(createTileElement(s + i));
   });
   const divZ = document.getElementById('tiles-z');
   divZ.innerHTML = '';
-  for (let i = 1; i <= 7; i++) {
-    divZ.appendChild(createTileElement('z' + i));
-  }
+  for (let i = 1; i <= 7; i++) divZ.appendChild(createTileElement('z' + i));
+
+  // 完成形例
+  renderTileArray(document.getElementById('pattern-basic'), ['m1','m2','m3', 'm4','m5','m6', 'p2','p3','p4', 's7','s7','s7', 'z1','z1']);
+  renderTileArray(document.getElementById('pattern-chitoi'), ['m2','m2', 'm8','m8', 'p1','p1', 'p5','p5', 's3','s3', 's9','s9', 'z5','z5']);
+  renderTileArray(document.getElementById('pattern-kokushi'), ['m1','m9', 'p1','p9', 's1','s9', 'z1','z2','z3','z4','z5','z6','z7', 'z7']);
 }
-renderAllTiles();
+initTilesAndPatterns();
 
-// ==================== 2. パズル完成形例の描画 ====================
-function renderGoalExamples() {
-  // 例1: 基本形 (123萬, 456萬, 777索, 234筒, 東東)
-  const appendTiles = (id, arr) => {
-    const el = document.getElementById(id);
-    arr.forEach(t => el.appendChild(createTileElement(t)));
-  };
-  appendTiles('ex1-m1', ['m1','m2','m3']);
-  appendTiles('ex1-m2', ['m4','m5','m6']);
-  appendTiles('ex1-m3', ['s7','s7','s7']);
-  appendTiles('ex1-m4', ['p2','p3','p4']);
-  appendTiles('ex1-head', ['z1','z1']);
-
-  // 例2: 七対子 (2枚×7組)
-  const ex2Tiles = ['m2','m2', 'm8','m8', 'p1','p1', 'p5','p5', 's3','s3', 's9','s9', 'z5','z5'];
-  const ex2Div = document.getElementById('ex2-container');
-  for (let i = 0; i < ex2Tiles.length; i += 2) {
-    const grp = document.createElement('div');
-    grp.className = 'tile-group';
-    grp.innerHTML = `<span class="tile-group-title">組${(i/2)+1}</span>`;
-    grp.appendChild(createTileElement(ex2Tiles[i]));
-    grp.appendChild(createTileElement(ex2Tiles[i+1]));
-    ex2Div.appendChild(grp);
-  }
-
-  // 例3: 国士無双 (19字牌全13種 + アタマ)
-  const ex3Tiles = ['m1','m9','p1','p9','s1','s9','z1','z2','z3','z4','z5','z6','z7', 'z7'];
-  const ex3Div = document.getElementById('ex3-container');
-  const grp1 = document.createElement('div');
-  grp1.className = 'tile-group';
-  grp1.innerHTML = `<span class="tile-group-title">13種</span>`;
-  for(let i=0; i<13; i++) grp1.appendChild(createTileElement(ex3Tiles[i]));
-  const grp2 = document.createElement('div');
-  grp2.className = 'tile-group';
-  grp2.style.border = '1px solid var(--danger)';
-  grp2.innerHTML = `<span class="tile-group-title">頭</span>`;
-  grp2.appendChild(createTileElement(ex3Tiles[13]));
-  ex3Div.appendChild(grp1);
-  ex3Div.appendChild(grp2);
-}
-renderGoalExamples();
-
-// ==================== 3. 網羅的役データ ====================
+// ==================== 役データ（手牌ビジュアル付き） ====================
 const YAKU_DATA = [
   // 1飜
-  { name: '立直 (リーチ)', category: '1han', naki: false, desc: '門前（鳴いていない状態）でテンパイした時に宣言する役。一発や裏ドラの権利が得られる。' },
-  { name: '断幺九 (タンヤオ)', category: '1han', naki: true, desc: '1と9、および字牌を一切使わず、2〜8の数牌だけで揃える役。鳴いても作れるため早アガリの基本。' },
-  { name: '役牌 (ヤクハイ)', category: '1han', naki: true, desc: '白・發・中（三元牌）、または場の風（東など）・自分の風を3枚揃えるだけで1役確定。鳴いてもOK。' },
-  { name: '平和 (ピンフ)', category: '1han', naki: false, desc: '面子がすべて階段（順子）で、アタマが役牌以外、最後の待ちが両面待ち。門前限定。' },
-  { name: '門前清自摸和 (ツモ)', category: '1han', naki: false, desc: '鳴かずに自分のツモだけで手牌14枚を完成させるとつく役。' },
-  { name: '一発 (イッパツ)', category: '1han', naki: false, desc: 'リーチ後、鳴きが入らない状態で1巡目以内にツモまたはロンアガリすると付く偶発役。' },
-
+  {
+    name: '立直 (リーチ)',
+    cat: '1han',
+    han: '1飜',
+    naki: false,
+    desc: '門前（鳴いていない状態）でテンパイした時に1000点棒を出して宣言する役。一発や裏ドラがつくチャンスがある。',
+    hand: ['m1','m2','m3', 'p4','p5','p6', 's7','s8','s9', 'z1','z1', 'm4','m5','m6']
+  },
+  {
+    name: '断幺九 (タンヤオ)',
+    cat: '1han',
+    han: '1飜',
+    naki: true,
+    desc: '1と9の数牌、および字牌を一切使わず、2〜8の数牌だけで揃える役。鳴いてもOK（クイタン）。',
+    hand: ['m2','m3','m4', 'p3','p4','p5', 's6','s7','s8', 's2','s3','s4', 'p7','p7']
+  },
+  {
+    name: '役牌 (ヤクハイ)',
+    cat: '1han',
+    han: '1飜',
+    naki: true,
+    desc: '白・發・中（三元牌）、または自分の風（自風）・場の風（場風）を3枚揃えるだけで成立。鳴きOK。',
+    hand: ['z5','z5','z5', 'm2','m3','m4', 'p5','p6','p7', 's3','s4','s5', 'p9','p9']
+  },
+  {
+    name: '平和 (ピンフ)',
+    cat: '1han',
+    han: '1飜',
+    naki: false,
+    desc: '4面子がすべて階段（順子）で、アタマが役牌以外、最後の待ちが両面待ちになる役。門前限定。',
+    hand: ['m2','m3','m4', 'm5','m6','m7', 'p4','p5','p6', 's2','s2', 's7','s8','s9']
+  },
+  {
+    name: '門前清自摸和 (ツモ)',
+    cat: '1han',
+    han: '1飜',
+    naki: false,
+    desc: '一度も鳴かずに、最後の14枚目を自分で引いて完成させると付く役。',
+    hand: ['m3','m4','m5', 'p2','p3','p4', 's6','s7','s8', 'z2','z2', 'm7','m8','m9']
+  },
   // 2飜
-  { name: '七対子 (チートイツ)', category: '2han', naki: false, desc: '【特殊形】同じ牌2枚のペアを7組作る役。4面子1雀頭の例外。門前限定。' },
-  { name: '対々和 (トイトイ)', category: '2han', naki: true, desc: '4つの面子をすべて「同じ牌3枚（刻子）」で揃える役。ポンを積極的に使って狙える。' },
-  { name: '三色同順 (サンショク)', category: '2han', naki: true, desc: '萬子・筒子・索子のすべてで同じ数字の階段（例: 234萬・234筒・234索）を作る役。鳴くと1飜に下がる。' },
-  { name: '一気通貫 (イッツー)', category: '2han', naki: true, desc: '同じ種類の数牌で「123・456・789」と1から9まで揃える役。鳴くと1飜に下がる。' },
-  { name: '混全帯幺九 (チャンタ)', category: '2han', naki: true, desc: 'すべての面子とアタマに「1・9・字牌」が1枚以上含まれている役。鳴くと1飜に下がる。' },
-  { name: '三暗刻 (サンアンコウ)', category: '2han', naki: true, desc: 'ポンをせず、自力で同じ牌3枚を3組作る役。' },
-
+  {
+    name: '七対子 (チートイツ)',
+    cat: '2han',
+    han: '2飜',
+    naki: false,
+    desc: '【特殊形】同じ牌2枚のペアを7組揃える役。4面子1雀頭のルールから外れた唯一無二の役。門前限定。',
+    hand: ['m1','m1', 'm5','m5', 'p3','p3', 'p9','p9', 's2','s2', 's8','s8', 'z3','z3']
+  },
+  {
+    name: '対々和 (トイトイ)',
+    cat: '2han',
+    han: '2飜',
+    naki: true,
+    desc: '4つの面子をすべて「同じ牌3枚（刻子）」で揃える役。ポンを多用して狙える。',
+    hand: ['m3','m3','m3', 'p5','p5','p5', 's1','s1','s1', 'z2','z2','z2', 'p8','p8']
+  },
+  {
+    name: '三色同順 (サンショク)',
+    cat: '2han',
+    han: '2飜',
+    naki: true,
+    desc: '萬子・筒子・索子の3種類すべてで、まったく同じ数字の階段（例: 234）を作る役（鳴くと1飜）。',
+    hand: ['m2','m3','m4', 'p2','p3','p4', 's2','s3','s4', 'z1','z1', 'p7','p8','p9']
+  },
+  {
+    name: '一気通貫 (イッツー)',
+    cat: '2han',
+    han: '2飜',
+    naki: true,
+    desc: '同じ種類の数牌で「123・456・789」と1から9まで一気に揃える役（鳴くと1飜）。',
+    hand: ['s1','s2','s3', 's4','s5','s6', 's7','s8','s9', 'm2','m3','m4', 'p5','p5']
+  },
   // 3〜6飜
-  { name: '混一色 (ホンイツ)', category: '3-6han', naki: true, desc: '字牌と、1種類の数牌（例: 索子＋字牌）だけで揃える役（3飜、鳴くと2飜）。初心者にも作りやすい高打点役。' },
-  { name: '純全帯幺九 (ジュンチャン)', category: '3-6han', naki: true, desc: '字牌を使わず、すべての面子とアタマに「1・9の数牌」を含める役（3飜、鳴くと2飜）。' },
-  { name: '二盃口 (リャンペーコー)', category: '3-6han', naki: false, desc: 'まったく同じ階段3枚組のペアを2セット作る役（3飜）。門前限定。' },
-  { name: '清一色 (チンイツ)', category: '3-6han', naki: true, desc: '字牌すら使わず、1種類の数牌だけで揃える役（6飜、鳴くと5飜）。満貫以上が確定する強力役。' },
-
-  // 役満・特殊
-  { name: '国士無双 (コクシムソウ)', category: 'yakuman', naki: false, desc: '【特殊形】1・9・字牌全13種類を1枚ずつ揃え、その中の1種をアタマにする究極役。' },
-  { name: '四暗刻 (スーアンコウ)', category: 'yakuman', naki: false, desc: 'ポンをせず、自力で同じ牌3枚を4組集めてアガる役満。' },
-  { name: '大三元 (ダイサンゲン)', category: 'yakuman', naki: true, desc: '白・發・中を3枚ずつすべて揃える役満。鳴いて揃えても成立する。' },
-  { name: '字一色 (ツーイーソー)', category: 'yakuman', naki: true, desc: '手牌14枚をすべて字牌（東南西北白發中）だけで揃える役満。' },
-  { name: '緑一色 (リューイーソー)', category: 'yakuman', naki: true, desc: '索子の2,3,4,6,8と發の「緑色の牌」だけで揃える役満。' },
-  { name: '九蓮宝燈 (チュウレンポウトウ)', category: 'yakuman', naki: false, desc: '1種類の数牌で「1112345678999」+任意の同色牌1枚を門前で作る幻の役満。' }
+  {
+    name: '混一色 (ホンイツ)',
+    cat: '3-6han',
+    han: '3飜',
+    naki: true,
+    desc: '字牌と、どれか1種類の数牌（例: 索子＋字牌）だけで揃える強力な役（鳴くと2飜）。',
+    hand: ['s1','s2','s3', 's4','s5','s6', 's7','s8','s9', 'z1','z1','z1', 'z5','z5']
+  },
+  {
+    name: '清一色 (チンイツ)',
+    cat: '3-6han',
+    han: '6飜',
+    naki: true,
+    desc: '字牌すら使わず、完全に1種類の数牌だけで揃える役（鳴くと5飜）。跳満以上が確定する。',
+    hand: ['m1','m2','m3', 'm2','m3','m4', 'm5','m6','m7', 'm7','m8','m9', 'm9','m9']
+  },
+  // 役満
+  {
+    name: '国士無双 (コクシムソウ)',
+    cat: 'yakuman',
+    han: '役満',
+    naki: false,
+    desc: '【特殊形】1・9・字牌全13種を1枚ずつ揃え、その中の1種をペアにする最高峰の役満。門前限定。',
+    hand: ['m1','m9', 'p1','p9', 's1','s9', 'z1','z2','z3','z4','z5','z6','z7', 'z7']
+  },
+  {
+    name: '大三元 (ダイサンゲン)',
+    cat: 'yakuman',
+    han: '役満',
+    naki: true,
+    desc: '白・發・中の3種類すべてを3枚組で揃える役満。鳴いて揃えても成立する。',
+    hand: ['z5','z5','z5', 'z6','z6','z6', 'z7','z7','z7', 'm2','m3','m4', 'p1','p1']
+  },
+  {
+    name: '四暗刻 (スーアンコウ)',
+    cat: 'yakuman',
+    han: '役満',
+    naki: false,
+    desc: 'ポンをせず、自力で同じ牌3枚を4組集めてツモアガリする究極の門前役満。',
+    hand: ['m2','m2','m2', 'p4','p4','p4', 's8','s8','s8', 'z3','z3','z3', 'p9','p9']
+  }
 ];
 
-function renderYakuList(filter = 'all') {
-  const container = document.getElementById('yaku-container');
+// ==================== 3. ビジュアル図鑑のレンダリング ====================
+function renderCatalog(filter = 'all') {
+  const container = document.getElementById('catalog-container');
   container.innerHTML = '';
-  const filtered = filter === 'all' 
-    ? YAKU_DATA 
-    : filter === 'special' 
-      ? YAKU_DATA.filter(y => y.desc.includes('特殊形'))
-      : YAKU_DATA.filter(y => y.category === filter);
+  const list = filter === 'all' ? YAKU_DATA : YAKU_DATA.filter(y => y.cat === filter);
 
-  filtered.forEach(y => {
+  list.forEach(y => {
+    const item = document.createElement('div');
+    item.className = 'yaku-catalog-item';
+    item.innerHTML = `
+      <div class="yaku-header">
+        <span class="yaku-title">${y.name}</span>
+        <div>
+          <span class="badge badge-han">${y.han}</span>
+          <span class="badge ${y.naki ? 'badge-naki' : 'badge-menzen'}">${y.naki ? '鳴きOK' : '門前限定'}</span>
+        </div>
+      </div>
+      <p style="font-size:0.88rem; color:#cbd5e1; margin-bottom:8px;">${y.desc}</p>
+      <div class="tile-hand" id="cat-hand-${y.name.replace(/\s+/g, '')}"></div>
+    `;
+    container.appendChild(item);
+    renderTileArray(item.querySelector('.tile-hand'), y.hand);
+  });
+}
+renderCatalog();
+
+function filterCatalog(cat) {
+  document.querySelectorAll('#tab-catalog .filter-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  renderCatalog(cat);
+}
+
+// ==================== 4. フラッシュカードのレンダリング ====================
+function renderFlashcards() {
+  const container = document.getElementById('flashcard-container');
+  container.innerHTML = '';
+
+  YAKU_DATA.forEach(y => {
     const card = document.createElement('div');
     card.className = 'flashcard';
     card.innerHTML = `
-      <div class="meta">
-        <span>${y.category.toUpperCase()}</span>
-        <span class="badge ${y.naki ? 'badge-naki' : 'badge-menzen'}">${y.naki ? '鳴きOK' : '門前限定'}</span>
+      <div class="front">
+        <div style="display:flex; justify-content:space-between;">
+          <span class="badge badge-han">${y.han}</span>
+          <span style="font-size:0.75rem; color:var(--text-muted);">クリックで答え</span>
+        </div>
+        <div style="margin: 10px 0; text-align:center;">
+          <div class="tile-hand" style="justify-content:center;"></div>
+          <div style="font-size:0.85rem; color:var(--accent); margin-top:4px;">この役の名前は何でしょう？</div>
+        </div>
+        <div style="text-align:center; font-size:0.75rem; color:#64748b;">裏面：役名と成立条件</div>
       </div>
-      <div class="front-title">${y.name}</div>
-      <div class="back-desc">
-        <strong style="color: var(--accent);">${y.name}</strong><br>
-        ${y.desc}
+      <div class="back">
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <strong style="color:var(--accent); font-size:1.15rem;">${y.name}</strong>
+            <span class="badge ${y.naki ? 'badge-naki' : 'badge-menzen'}">${y.naki ? '鳴きOK' : '門前限定'}</span>
+          </div>
+          <p style="font-size:0.85rem; color:#e2e8f0; margin-top:8px; line-height:1.4;">${y.desc}</p>
+        </div>
+        <div style="font-size:0.75rem; color:var(--text-muted); text-align:right;">もう一度クリックで戻る</div>
       </div>
     `;
+    renderTileArray(card.querySelector('.tile-hand'), y.hand);
     card.onclick = () => card.classList.toggle('flipped');
     container.appendChild(card);
   });
 }
-renderYakuList();
+renderFlashcards();
 
-function filterYaku(cat) {
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  event.target.classList.add('active');
-  renderYakuList(cat);
-}
-
-// ==================== 4. 実戦対戦 ＆ 捨て牌理由エンジン ====================
+// ==================== 5. 実戦対局 & 推奨理由エンジン ====================
 let gameState = {
   wall: [],
   playerHand: [],
@@ -594,60 +796,49 @@ function sortHand(hand) {
   });
 }
 
-// 捨て牌の推奨判定と詳細理由の算出
 function evaluateDiscard(hand) {
-  // 1. 各牌の孤立度・優先度を計算
-  let bestIdx = 0;
-  let maxScore = -999;
-  let reason = '';
-
   const tileScores = hand.map((tile, idx) => {
     const s = tile[0];
     const n = parseInt(tile[1], 10);
     let score = 0;
     let detail = '';
-
     const count = hand.filter(t => t === tile).length;
 
     if (s === 'z') {
-      // 字牌
       if (count === 1) {
-        score = 100; // 孤立字牌は最優先で切る
+        score = 100;
         const name = TILES_DEF.z.chars[n - 1];
-        detail = `字牌「${name}」が1枚だけ孤立しています。字牌は順子（階段）にならず、他の牌と繋がりません。手牌を早く揃えるために孤立した字牌から処分するのが麻雀の基本です。`;
+        detail = `字牌「${name}」が1枚だけ孤立しています。字牌は順子（階段）にならず他と繋がりません。序盤は孤立字牌を捨てて手牌のスリム化を図るのが鉄則です。`;
       } else if (count === 2) {
-        score = 20; // ペア
+        score = 20;
       } else {
-        score = -50; // コーツ
+        score = -50;
       }
     } else {
-      // 数牌
       if (count === 1) {
         const hasNeighbor1 = hand.some(t => t[0] === s && Math.abs(parseInt(t[1], 10) - n) === 1);
         const hasNeighbor2 = hand.some(t => t[0] === s && Math.abs(parseInt(t[1], 10) - n) === 2);
 
         if (!hasNeighbor1 && !hasNeighbor2) {
-          // 完全孤立牌
           if (n === 1 || n === 9) {
             score = 90;
-            detail = `端牌の「${n}${TILES_DEF[s].name}」が孤立しています。1や9は外側に伸びないため（1なら2・3と引くしかない）、真ん中の牌に比べて面子を作る効率が極めて悪いです。`;
+            detail = `端牌「${n}${TILES_DEF[s].name}」が孤立しています。1や9は外側に伸びないため、2〜8の中央牌に比べて面子を作る効率が極めて悪いです。`;
           } else if (n === 2 || n === 8) {
             score = 75;
-            detail = `「${n}${TILES_DEF[s].name}」が孤立しています。中央牌（3〜7）よりも面子になりにくいため、優先して切り出します。`;
+            detail = `「${n}${TILES_DEF[s].name}」が孤立しています。3〜7の中央牌よりも繋がりづらいため、切る優先度が高いです。`;
           } else {
             score = 60;
-            detail = `「${n}${TILES_DEF[s].name}」の周りに牌がありません。中央牌ですが現状は孤立しているため切る候補です。`;
+            detail = `「${n}${TILES_DEF[s].name}」の周囲に牌がありません。現在孤立しているため整理候補です。`;
           }
         } else if (!hasNeighbor1 && hasNeighbor2) {
-          score = 30; // カンチャン候補
+          score = 30;
         } else {
-          score = 0; // 連結している
+          score = 0;
         }
       } else {
         score = -10;
       }
     }
-
     return { idx, tile, score, detail };
   });
 
@@ -673,7 +864,7 @@ function renderGame() {
   if (isAssist && gameState.isPlayerTurn && gameState.playerHand.length === 14) {
     evalResult = evaluateDiscard(gameState.playerHand);
     reasonDiv.style.display = 'block';
-    reasonDiv.innerHTML = `<strong>💡 AIのアドバイス（推奨理由）：</strong><br>${evalResult.detail}`;
+    reasonDiv.innerHTML = `<strong>💡 AIの助言（推奨理由）：</strong><br>${evalResult.detail}`;
   } else {
     reasonDiv.style.display = 'none';
   }
@@ -705,14 +896,12 @@ function playerDiscard(index) {
   document.getElementById('player-status').innerText = 'CPUが考えています...';
   renderGame();
 
-  setTimeout(cpuTurn, 800);
+  setTimeout(cpuTurn, 700);
 }
 
 function cpuTurn() {
   if (gameState.wall.length === 0) return alert('流局（引き分け）です。');
   gameState.cpuHand.push(gameState.wall.pop());
-  
-  // CPUも孤立牌評価を使って賢く捨てる
   const evalCpu = evaluateDiscard(gameState.cpuHand);
   const discarded = gameState.cpuHand.splice(evalCpu.idx, 1)[0];
   gameState.cpuRiver.push(discarded);
