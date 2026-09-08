@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>実践型麻雀学習ポータル サウンド完全対応版</title>
+  <title>実践型麻雀学習ポータル 牌効率AI搭載版</title>
   <style>
     :root {
       --bg-color: #0b0f19;
@@ -33,7 +33,6 @@
     }
     header h1 { font-size: 1.4rem; color: var(--accent); margin-bottom: 4px; }
 
-    /* ナビゲーション */
     nav {
       display: flex;
       justify-content: flex-start;
@@ -195,14 +194,29 @@
       border-radius: 6px;
       font-size: 0.9rem;
     }
+    .shanten-badge {
+      background: #3b82f6;
+      color: #fff;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+    }
+    .shanten-badge.tenpai {
+      background: var(--gold);
+      color: #000;
+      font-weight: bold;
+      animation: pulse 1s infinite alternate;
+    }
+
     .reason-box {
       background: rgba(15, 23, 42, 0.9);
       border-left: 4px solid var(--accent);
-      padding: 10px 14px;
+      padding: 12px 14px;
       border-radius: 4px;
       font-size: 0.9rem;
       color: #e2e8f0;
       margin-top: 10px;
+      line-height: 1.5;
     }
 
     /* アクションバー */
@@ -318,7 +332,7 @@
 </header>
 
 <nav>
-  <button class="active" onclick="switchTab('game')">1. 実戦対局 (音響 & BGMつき)</button>
+  <button class="active" onclick="switchTab('game')">1. 実戦対局 (牌効率AI搭載)</button>
   <button onclick="switchTab('basics')">2. 基本ルール & 鳴き</button>
   <button onclick="switchTab('catalog')">3. 全役ビジュアル図鑑</button>
   <button onclick="switchTab('flashcards')">4. 役暗記カード</button>
@@ -333,9 +347,8 @@
         <button class="btn btn-sound" id="btn-bgm-toggle" onclick="toggleBgmUI()">🎵 BGM: OFF</button>
         <label style="cursor:pointer;">
           <input type="checkbox" id="assist-mode" checked onchange="renderGame()">
-          <strong>初心補助（理由の表示）</strong>
+          <strong>牌効率AIアシスト（推奨理由と受け入れ枚数表示）</strong>
         </label>
-        <span id="tenpai-status" style="font-weight:bold; color:var(--gold);"></span>
       </div>
       <button class="btn" onclick="startNewGame()">対局をリセット</button>
     </div>
@@ -353,7 +366,10 @@
         <div class="river" id="player-river"></div>
         <div class="table-info" style="margin: 10px 0 6px;">
           <span>あなたの手牌</span>
-          <span id="player-turn-status" style="color:var(--accent);">あなたのツモ番です</span>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span id="shanten-display" class="shanten-badge">配牌中</span>
+            <span id="player-turn-status" style="color:var(--accent);">あなたのツモ番です</span>
+          </div>
         </div>
 
         <div class="hand-row">
@@ -432,17 +448,12 @@ const SoundEngine = {
       const AudioCtx = window.AudioContext || window.webkitAudioContext;
       this.ctx = new AudioCtx();
     }
-    if (this.ctx.state === 'suspended') {
-      this.ctx.resume();
-    }
+    if (this.ctx.state === 'suspended') this.ctx.resume();
   },
 
-  // 1. 打牌音（牌を卓に叩くリアルな音：ノイズ + 乾いた打撃）
   playDiscard() {
     this.init();
     const t = this.ctx.currentTime;
-
-    // ノイズ（擦れる・当たる高周波）
     const bufSize = this.ctx.sampleRate * 0.035;
     const buf = this.ctx.createBuffer(1, bufSize, this.ctx.sampleRate);
     const data = buf.getChannelData(0);
@@ -459,51 +470,39 @@ const SoundEngine = {
     nGain.gain.setValueAtTime(0.9, t);
     nGain.gain.exponentialRampToValueAtTime(0.01, t + 0.035);
 
-    noise.connect(filter);
-    filter.connect(nGain);
-    nGain.connect(this.ctx.destination);
+    noise.connect(filter); filter.connect(nGain); nGain.connect(this.ctx.destination);
     noise.start(t);
 
-    // コツッという硬質な芯の音
     const osc = this.ctx.createOscillator();
     const oGain = this.ctx.createGain();
     osc.type = 'triangle';
     osc.frequency.setValueAtTime(440, t);
     osc.frequency.exponentialRampToValueAtTime(110, t + 0.04);
-
     oGain.gain.setValueAtTime(0.8, t);
     oGain.gain.exponentialRampToValueAtTime(0.01, t + 0.04);
 
-    osc.connect(oGain);
-    oGain.connect(this.ctx.destination);
-    osc.start(t);
-    osc.stop(t + 0.045);
+    osc.connect(oGain); oGain.connect(this.ctx.destination);
+    osc.start(t); osc.stop(t + 0.045);
   },
 
-  // 2. ポン音 (シャキーンとした発声・合図音)
   playPon() {
     this.init();
     const t = this.ctx.currentTime;
-    [587.33, 880].forEach((f, i) => { // D5 -> A5
+    [587.33, 880].forEach((f, i) => {
       const osc = this.ctx.createOscillator();
       const g = this.ctx.createGain();
       osc.type = 'sine';
       osc.frequency.setValueAtTime(f, t + i * 0.07);
       g.gain.setValueAtTime(0.35, t + i * 0.07);
       g.gain.exponentialRampToValueAtTime(0.001, t + i * 0.07 + 0.25);
-      osc.connect(g);
-      g.connect(this.ctx.destination);
-      osc.start(t + i * 0.07);
-      osc.stop(t + i * 0.07 + 0.28);
+      osc.connect(g); g.connect(this.ctx.destination);
+      osc.start(t + i * 0.07); osc.stop(t + i * 0.07 + 0.28);
     });
   },
 
-  // 3. ロン音 (ドギャーン！という劇的な一撃衝撃音)
   playRon() {
     this.init();
     const t = this.ctx.currentTime;
-
-    // 低音のヘビーな衝撃波
     const sub = this.ctx.createOscillator();
     const sGain = this.ctx.createGain();
     sub.type = 'sawtooth';
@@ -511,58 +510,44 @@ const SoundEngine = {
     sub.frequency.exponentialRampToValueAtTime(25, t + 0.5);
     sGain.gain.setValueAtTime(1.0, t);
     sGain.gain.exponentialRampToValueAtTime(0.001, t + 0.5);
-    sub.connect(sGain);
-    sGain.connect(this.ctx.destination);
-    sub.start(t);
-    sub.stop(t + 0.55);
+    sub.connect(sGain); sGain.connect(this.ctx.destination);
+    sub.start(t); sub.stop(t + 0.55);
 
-    // 緊迫のドラマチック和音クラッシュ
-    const chord = [349.23, 415.30, 523.25, 698.46]; // Fm
-    chord.forEach(f => {
+    [349.23, 415.30, 523.25, 698.46].forEach(f => {
       const osc = this.ctx.createOscillator();
       const g = this.ctx.createGain();
       osc.type = 'triangle';
       osc.frequency.setValueAtTime(f, t);
       g.gain.setValueAtTime(0.35, t);
       g.gain.exponentialRampToValueAtTime(0.001, t + 1.4);
-      osc.connect(g);
-      g.connect(this.ctx.destination);
-      osc.start(t);
-      osc.stop(t + 1.45);
+      osc.connect(g); g.connect(this.ctx.destination);
+      osc.start(t); osc.stop(t + 1.45);
     });
 
-    // 画面シェイク演出
     const table = document.getElementById('mahjong-table');
     table.classList.add('shake');
     setTimeout(() => table.classList.remove('shake'), 450);
   },
 
-  // 4. ツモ音 (華やかな祝賀ファンファーレ)
   playTsumo() {
     this.init();
     const t = this.ctx.currentTime;
-    const arpeggio = [523.25, 659.25, 783.99, 1046.50]; // C Major
-    arpeggio.forEach((f, idx) => {
+    [523.25, 659.25, 783.99, 1046.50].forEach((f, idx) => {
       const osc = this.ctx.createOscillator();
       const g = this.ctx.createGain();
       osc.type = 'sine';
       osc.frequency.setValueAtTime(f, t + idx * 0.08);
       g.gain.setValueAtTime(0.4, t + idx * 0.08);
       g.gain.exponentialRampToValueAtTime(0.001, t + idx * 0.08 + 1.2);
-      osc.connect(g);
-      g.connect(this.ctx.destination);
-      osc.start(t + idx * 0.08);
-      osc.stop(t + idx * 0.08 + 1.3);
+      osc.connect(g); g.connect(this.ctx.destination);
+      osc.start(t + idx * 0.08); osc.stop(t + idx * 0.08 + 1.3);
     });
   },
 
-  // 5. 対局BGM (和風ペンタトニック／琴と竹笛風の心落ち着くループ)
   startBGM() {
     this.init();
     if (this.bgmPlaying) return;
     this.bgmPlaying = true;
-
-    // 陽旋法・ペンタトニックスケール (D, F, G, A, C, D)
     const melodyScale = [293.66, 349.23, 392.00, 440.00, 523.25, 587.33];
     const bassScale = [146.83, 174.61, 196.00];
     let step = 0;
@@ -570,8 +555,6 @@ const SoundEngine = {
     const tick = () => {
       if (!this.bgmPlaying) return;
       const t = this.ctx.currentTime;
-
-      // 琴風のメロディ
       if (Math.random() > 0.25) {
         const freq = melodyScale[Math.floor(Math.random() * melodyScale.length)];
         const osc = this.ctx.createOscillator();
@@ -580,13 +563,9 @@ const SoundEngine = {
         osc.frequency.setValueAtTime(freq, t);
         g.gain.setValueAtTime(0.07, t);
         g.gain.exponentialRampToValueAtTime(0.001, t + 0.6);
-        osc.connect(g);
-        g.connect(this.ctx.destination);
-        osc.start(t);
-        osc.stop(t + 0.65);
+        osc.connect(g); g.connect(this.ctx.destination);
+        osc.start(t); osc.stop(t + 0.65);
       }
-
-      // 静かな低音 (4拍ごと)
       if (step % 4 === 0) {
         const bFreq = bassScale[(step / 4) % bassScale.length];
         const bOsc = this.ctx.createOscillator();
@@ -595,16 +574,12 @@ const SoundEngine = {
         bOsc.frequency.setValueAtTime(bFreq, t);
         bGain.gain.setValueAtTime(0.08, t);
         bGain.gain.exponentialRampToValueAtTime(0.001, t + 1.8);
-        bOsc.connect(bGain);
-        bGain.connect(this.ctx.destination);
-        bOsc.start(t);
-        bOsc.stop(t + 1.9);
+        bOsc.connect(bGain); bGain.connect(this.ctx.destination);
+        bOsc.start(t); bOsc.stop(t + 1.9);
       }
-
       step++;
       this.bgmTimer = setTimeout(tick, 450);
     };
-
     tick();
   },
 
@@ -650,6 +625,10 @@ function idxToTile(i) {
   return 'z' + (i - 26);
 }
 
+function tileToString(t) {
+  return `${t[1]}${TILES_DEF[t[0]].name}`;
+}
+
 function createTileElement(tileStr, onClick = null, recommend = false) {
   const suit = tileStr[0], num = parseInt(tileStr[1], 10);
   const def = TILES_DEF[suit];
@@ -665,12 +644,154 @@ function renderTileArray(container, tileArray) {
   tileArray.forEach(t => container.appendChild(createTileElement(t)));
 }
 
-// ==================== アガリ & 役判定アルゴリズム ====================
+// ==================== 本格シャンテン数計算エンジン ====================
+function calcNormalShanten(counts, meldCount = 0) {
+  let minS = 8;
+
+  // 雀頭あり
+  for (let i = 0; i < 34; i++) {
+    if (counts[i] >= 2) {
+      counts[i] -= 2;
+      decompose(0, meldCount, 0, true);
+      counts[i] += 2;
+    }
+  }
+  // 雀頭なし
+  decompose(0, meldCount, 0, false);
+
+  function decompose(idx, m, t, hasHead) {
+    while (idx < 34 && counts[idx] === 0) idx++;
+    if (idx === 34) {
+      let effT = t;
+      if (m + effT > 4) effT = 4 - m;
+      let s = 8 - 2 * m - effT - (hasHead ? 1 : 0);
+      if (s < minS) minS = s;
+      return;
+    }
+
+    // 刻子
+    if (counts[idx] >= 3) {
+      counts[idx] -= 3;
+      decompose(idx, m + 1, t, hasHead);
+      counts[idx] += 3;
+    }
+    // 順子
+    if (idx < 27 && (idx % 9) <= 6 && counts[idx + 1] > 0 && counts[idx + 2] > 0) {
+      counts[idx]--; counts[idx + 1]--; counts[idx + 2]--;
+      decompose(idx, m + 1, t, hasHead);
+      counts[idx]++; counts[idx + 1]++; counts[idx + 2]++;
+    }
+    // 対子 (塔子扱い)
+    if (counts[idx] >= 2) {
+      counts[idx] -= 2;
+      decompose(idx, m, t + 1, hasHead);
+      counts[idx] += 2;
+    }
+    // 両面・嵌張 (塔子扱い)
+    if (idx < 27 && (idx % 9) <= 7 && counts[idx + 1] > 0) {
+      counts[idx]--; counts[idx + 1]--;
+      decompose(idx, m, t + 1, hasHead);
+      counts[idx]++; counts[idx + 1]++;
+    }
+    if (idx < 27 && (idx % 9) <= 6 && counts[idx + 2] > 0) {
+      counts[idx]--; counts[idx + 2]--;
+      decompose(idx, m, t + 1, hasHead);
+      counts[idx]++; counts[idx + 2]++;
+    }
+    // 孤立牌としてスキップ
+    counts[idx]--;
+    decompose(idx, m, t, hasHead);
+    counts[idx]++;
+  }
+
+  return minS;
+}
+
+function getShanten(handTiles, meldCount = 0, isMenzen = true) {
+  const counts = new Array(34).fill(0);
+  handTiles.forEach(t => counts[tileToIdx(t)]++);
+
+  let minS = calcNormalShanten(counts, meldCount);
+
+  if (isMenzen && meldCount === 0) {
+    // 七対子
+    let pairs = 0, kinds = 0;
+    for (let i = 0; i < 34; i++) {
+      if (counts[i] >= 2) pairs++;
+      if (counts[i] >= 1) kinds++;
+    }
+    let chitoi = 6 - pairs;
+    if (kinds < 7) chitoi += (7 - kinds);
+    if (chitoi < minS) minS = chitoi;
+
+    // 国士無双
+    const kokushiIdx = [0, 8, 9, 17, 18, 26, 27, 28, 29, 30, 31, 32, 33];
+    let kCount = 0, hasKPair = false;
+    kokushiIdx.forEach(i => {
+      if (counts[i] >= 1) kCount++;
+      if (counts[i] >= 2) hasKPair = true;
+    });
+    let kokushi = 13 - kCount - (hasKPair ? 1 : 0);
+    if (kokushi < minS) minS = kokushi;
+  }
+
+  return minS;
+}
+
+// 牌効率（有効牌と受け入れ枚数）計算
+function evaluateTileEfficiency(handTiles, meldCount, isMenzen, visibleCounts) {
+  const currentS = getShanten(handTiles, meldCount, isMenzen);
+  const candidateScores = [];
+
+  // 各牌を切った場合のシャンテン数と有効牌枚数を調査
+  handTiles.forEach((tile, idx) => {
+    const rem = [...handTiles];
+    rem.splice(idx, 1);
+    const remS = getShanten(rem, meldCount, isMenzen);
+
+    let outs = 0;
+    const waitTiles = [];
+
+    for (let i = 0; i < 34; i++) {
+      const testTile = idxToTile(i);
+      const testHand = [...rem, testTile];
+      const testS = getShanten(testHand, meldCount, isMenzen);
+
+      // ツモってシャンテン数が進む牌（またはアガリになる牌）
+      if (testS < remS) {
+        waitTiles.push(testTile);
+        const remainInWall = 4 - (visibleCounts[i] || 0);
+        outs += Math.max(0, remainInWall);
+      }
+    }
+
+    candidateScores.push({
+      idx,
+      tile,
+      shantenAfter: remS,
+      outs,
+      waitTiles
+    });
+  });
+
+  // 1. シャンテン数が一番小さくなる打牌
+  // 2. その中で受け入れ枚数 (outs) が最大になる打牌
+  candidateScores.sort((a, b) => {
+    if (a.shantenAfter !== b.shantenAfter) return a.shantenAfter - b.shantenAfter;
+    return b.outs - a.outs;
+  });
+
+  return {
+    best: candidateScores[0],
+    currentShanten: currentS
+  };
+}
+
+// ==================== アガリ & 役判定 ====================
 function checkAgari(handTiles, isMenzen = true) {
   const counts = new Array(34).fill(0);
   handTiles.forEach(t => counts[tileToIdx(t)]++);
 
-  // 国士無双
   if (handTiles.length === 14 && isMenzen) {
     const kIdx = [0, 8, 9, 17, 18, 26, 27, 28, 29, 30, 31, 32, 33];
     let kCount = 0, hasPair = false;
@@ -679,16 +800,12 @@ function checkAgari(handTiles, isMenzen = true) {
       else if (counts[i] === 2) { kCount++; hasPair = true; }
     });
     if (kCount === 13 && hasPair) return { win: true, yaku: ['役満 国士無双'], score: '32,000点 (役満)' };
-  }
 
-  // 七対子
-  if (handTiles.length === 14 && isMenzen) {
     let pairs = 0;
     for (let i = 0; i < 34; i++) if (counts[i] === 2) pairs++;
     if (pairs === 7) return { win: true, yaku: ['七対子 (チートイツ)'], score: '2飜 2,400点' };
   }
 
-  // 通常形 (4面子1雀頭)
   for (let head = 0; head < 34; head++) {
     if (counts[head] >= 2) {
       counts[head] -= 2;
@@ -735,16 +852,12 @@ function judgeYaku(handTiles, headIdx, mentsu, isMenzen) {
   let totalHan = 0;
   const koutsuCount = mentsu.filter(m => m.type === 'koutsu').length;
 
-  if (isMenzen && koutsuCount === 4) {
-    return { win: true, yaku: ['役満 四暗刻 (スーアンコウ)'], score: '32,000点 (役満)' };
-  }
+  if (isMenzen && koutsuCount === 4) return { win: true, yaku: ['役満 四暗刻 (スーアンコウ)'], score: '32,000点 (役満)' };
 
   const hasHaku = mentsu.some(m => m.type === 'koutsu' && m.tile === 31);
   const hasHatsu = mentsu.some(m => m.type === 'koutsu' && m.tile === 32);
   const hasChun = mentsu.some(m => m.type === 'koutsu' && m.tile === 33);
-  if (hasHaku && hasHatsu && hasChun) {
-    return { win: true, yaku: ['役満 大三元 (ダイサンゲン)'], score: '32,000点 (役満)' };
-  }
+  if (hasHaku && hasHatsu && hasChun) return { win: true, yaku: ['役満 大三元 (ダイサンゲン)'], score: '32,000点 (役満)' };
 
   if (koutsuCount === 4) { yakuList.push('対々和 (トイトイ) 2飜'); totalHan += 2; }
 
@@ -764,27 +877,12 @@ function judgeYaku(handTiles, headIdx, mentsu, isMenzen) {
     }
   });
 
-  if (isMenzen && yakuList.length === 0) {
-    yakuList.push('門前清自摸和 (ツモ) 1飜'); totalHan += 1;
-  }
-  if (yakuList.length === 0) {
-    yakuList.push('基本形完成 (役なし)'); totalHan = 1;
-  }
+  if (isMenzen && yakuList.length === 0) { yakuList.push('門前清自摸和 (ツモ) 1飜'); totalHan += 1; }
+  if (yakuList.length === 0) { yakuList.push('基本形完成 (役なし)'); totalHan = 1; }
 
   const scoreTable = { 1: '1,000点', 2: '2,000点', 3: '3,900点', 4: '8,000点 (満貫)', 5: '8,000点 (満貫)' };
   const scoreStr = scoreTable[Math.min(totalHan, 5)] || '12,000点 (跳満)';
   return { win: true, yaku: yakuList, score: scoreStr };
-}
-
-function getWaits(hand13, isMenzen) {
-  const waits = [];
-  for (let i = 0; i < 34; i++) {
-    const testTile = idxToTile(i);
-    const testHand = [...hand13, testTile];
-    const res = checkAgari(testHand, isMenzen);
-    if (res.win) waits.push(testTile);
-  }
-  return waits;
 }
 
 // ==================== ゲーム進行ステート ====================
@@ -843,51 +941,23 @@ function sortHand(hand) {
   });
 }
 
-function evaluateDiscard(hand) {
-  const tileScores = hand.map((tile, idx) => {
-    const s = tile[0], n = parseInt(tile[1], 10);
-    let score = 0, detail = '';
-    const count = hand.filter(t => t === tile).length;
-
-    if (s === 'z') {
-      if (count === 1) {
-        score = 100;
-        detail = `字牌「${TILES_DEF.z.chars[n-1]}」が孤立しています。字牌は階段にならず面子になりにくいため、最優先で捨てて手牌を整理しましょう。`;
-      } else if (count === 2) score = 15;
-      else score = -50;
-    } else {
-      if (count === 1) {
-        const hasN1 = hand.some(t => t[0] === s && Math.abs(parseInt(t[1], 10) - n) === 1);
-        const hasN2 = hand.some(t => t[0] === s && Math.abs(parseInt(t[1], 10) - n) === 2);
-        if (!hasN1 && !hasN2) {
-          if (n === 1 || n === 9) {
-            score = 90;
-            detail = `端牌「${n}${TILES_DEF[s].name}」が孤立しています。1や9は外側に伸びないため、面子を作る効率が悪いです。`;
-          } else if (n === 2 || n === 8) {
-            score = 70;
-            detail = `「${n}${TILES_DEF[s].name}」が孤立しています。中央牌に比べて面子になりにくいため切る候補です。`;
-          } else {
-            score = 55;
-            detail = `「${n}${TILES_DEF[s].name}」の周りに牌がありません。孤立牌のため整理しましょう。`;
-          }
-        } else if (!hasN1 && hasN2) score = 25;
-        else score = 0;
-      } else score = -10;
-    }
-    return { idx, tile, score, detail };
-  });
-
-  tileScores.sort((a, b) => b.score - a.score);
-  return tileScores[0];
+function getVisibleCounts() {
+  const counts = new Array(34).fill(0);
+  gameState.playerHand.forEach(t => counts[tileToIdx(t)]++);
+  gameState.playerMelds.forEach(m => m.forEach(t => counts[tileToIdx(t)]++));
+  gameState.playerRiver.forEach(t => counts[tileToIdx(t)]++);
+  gameState.cpuRiver.forEach(t => counts[tileToIdx(t)]++);
+  return counts;
 }
 
+// 画面レンダリング
 function renderGame() {
   const pHandDiv = document.getElementById('player-hand');
   const pMeldsDiv = document.getElementById('player-melds');
   const pRiverDiv = document.getElementById('player-river');
   const cRiverDiv = document.getElementById('cpu-river');
   const reasonDiv = document.getElementById('reason-display');
-  const tenpaiSpan = document.getElementById('tenpai-status');
+  const shantenBadge = document.getElementById('shanten-display');
   const isAssist = document.getElementById('assist-mode').checked;
 
   pHandDiv.innerHTML = '';
@@ -905,6 +975,7 @@ function renderGame() {
     pMeldsDiv.style.display = 'none';
   }
 
+  // アガリチェック
   let winInfo = null;
   if (gameState.playerHand.length + (gameState.playerMelds.length * 3) === 14) {
     const allTiles = [...gameState.playerHand];
@@ -912,30 +983,57 @@ function renderGame() {
     winInfo = checkAgari(allTiles, gameState.isMenzen);
   }
 
-  if (gameState.playerHand.length + (gameState.playerMelds.length * 3) === 13) {
-    const waits = getWaits(gameState.playerHand, gameState.isMenzen);
-    if (waits.length > 0) {
-      const waitNames = waits.map(w => `${w[1]}${TILES_DEF[w[0]].name}`).join('、');
-      tenpaiSpan.innerText = `⚡ テンパイ中！ 待ち牌：【 ${waitNames} 】`;
-    } else {
-      tenpaiSpan.innerText = '';
-    }
+  // 牌効率・シャンテン数計算
+  const visible = getVisibleCounts();
+  const effResult = evaluateTileEfficiency(
+    gameState.playerHand,
+    gameState.playerMelds.length,
+    gameState.isMenzen,
+    visible
+  );
+
+  // シャンテンバッジの更新
+  const s = effResult.currentShanten;
+  if (winInfo && winInfo.win) {
+    shantenBadge.className = 'shanten-badge tenpai';
+    shantenBadge.innerText = 'アガリ完成！';
+  } else if (s === 0) {
+    shantenBadge.className = 'shanten-badge tenpai';
+    shantenBadge.innerText = '⚡ テンパイ！ (あと1牌)';
+  } else if (s === 1) {
+    shantenBadge.className = 'shanten-badge';
+    shantenBadge.innerText = '一向聴 (イーシャンテン)';
+  } else if (s === 2) {
+    shantenBadge.className = 'shanten-badge';
+    shantenBadge.innerText = '二向聴 (リャンシャンテン)';
+  } else {
+    shantenBadge.className = 'shanten-badge';
+    shantenBadge.innerText = `${s}向聴`;
   }
 
-  let evalResult = null;
+  // AI理由解説
+  let bestIdx = -1;
   if (winInfo && winInfo.win) {
     reasonDiv.style.display = 'block';
-    reasonDiv.innerHTML = `<strong>🎉 アガリ形が完成しています！</strong><br>画面上の「🀄 ツモアガリ！」ボタンを押してください！`;
+    reasonDiv.innerHTML = `<strong>🎉 アガリ形が完成しています！</strong><br>画面上の「🀄 ツモアガリ！」ボタンを押して勝利を宣言してください！`;
   } else if (isAssist && gameState.isPlayerTurn && gameState.playerHand.length % 3 === 2) {
-    evalResult = evaluateDiscard(gameState.playerHand);
+    bestIdx = effResult.best.idx;
+    const bestTileStr = tileToString(effResult.best.tile);
+    const waitsStr = effResult.best.waitTiles.slice(0, 6).map(tileToString).join('・') + (effResult.best.waitTiles.length > 6 ? ' など' : '');
+
     reasonDiv.style.display = 'block';
-    reasonDiv.innerHTML = `<strong>💡 AIのアドバイス（推奨理由）：</strong><br>${evalResult.detail}`;
+    reasonDiv.innerHTML = `
+      <strong>💡 牌効率AIの推奨打牌：【 ${bestTileStr} 】</strong><br>
+      この牌を切ると、手牌が一番広い受け入れになります。<br>
+      ・有効牌：【 <strong>${waitsStr || 'なし'}</strong> 】<br>
+      ・山に残っている受け入れ枚数：<strong>合計 ${effResult.best.outs} 枚</strong>（最大効率）
+    `;
   } else {
     reasonDiv.style.display = 'none';
   }
 
   gameState.playerHand.forEach((t, idx) => {
-    const isRec = (!winInfo || !winInfo.win) && isAssist && evalResult && idx === evalResult.idx;
+    const isRec = (!winInfo || !winInfo.win) && isAssist && idx === bestIdx;
     const tileEl = createTileElement(t, () => {
       if (gameState.isPlayerTurn && gameState.playerHand.length % 3 === 2) {
         playerDiscard(idx);
@@ -945,9 +1043,8 @@ function renderGame() {
   });
 }
 
-// プレイヤーツモ
 function playerDraw() {
-  if (gameState.wall.length === 0) return alert('流局（引き分け）です。');
+  if (gameState.wall.length === 0) return alert('牌がなくなりました。流局（引き分け）です。');
   gameState.isPlayerTurn = true;
   const newTile = gameState.wall.pop();
   gameState.playerHand.push(newTile);
@@ -971,9 +1068,8 @@ function playerDraw() {
   renderGame();
 }
 
-// プレイヤー打牌
 function playerDiscard(index) {
-  SoundEngine.playDiscard(); // 打牌音再生
+  SoundEngine.playDiscard();
   document.getElementById('action-bar').style.display = 'none';
   const discarded = gameState.playerHand.splice(index, 1)[0];
   gameState.playerRiver.push(discarded);
@@ -985,14 +1081,16 @@ function playerDiscard(index) {
   setTimeout(cpuTurn, 700);
 }
 
-// CPUターン
 function cpuTurn() {
   if (gameState.wall.length === 0) return alert('流局（引き分け）です。');
   gameState.cpuHand.push(gameState.wall.pop());
-  const evalCpu = evaluateDiscard(gameState.cpuHand);
-  const discarded = gameState.cpuHand.splice(evalCpu.idx, 1)[0];
+  
+  // CPUも牌効率エンジンで最も賢く打牌
+  const visible = getVisibleCounts();
+  const effCpu = evaluateTileEfficiency(gameState.cpuHand, 0, true, visible);
+  const discarded = gameState.cpuHand.splice(effCpu.best.idx, 1)[0];
 
-  SoundEngine.playDiscard(); // CPU打牌音再生
+  SoundEngine.playDiscard();
   gameState.cpuRiver.push(discarded);
   sortHand(gameState.cpuHand);
   renderGame();
@@ -1000,7 +1098,6 @@ function cpuTurn() {
   checkPlayerReaction(discarded);
 }
 
-// ロン・ポン判定
 function checkPlayerReaction(discardTile) {
   const actBar = document.getElementById('action-bar');
   actBar.innerHTML = '';
@@ -1026,7 +1123,7 @@ function checkPlayerReaction(discardTile) {
     if (canPon) {
       const ponBtn = document.createElement('button');
       ponBtn.className = 'btn btn-pon';
-      ponBtn.innerText = `ポン (${discardTile[1]}${TILES_DEF[discardTile[0]].name})`;
+      ponBtn.innerText = `ポン (${tileToString(discardTile)})`;
       ponBtn.onclick = () => executePon(discardTile);
       actBar.appendChild(ponBtn);
     }
@@ -1045,9 +1142,8 @@ function checkPlayerReaction(discardTile) {
   }
 }
 
-// ポンの実行
 function executePon(tile) {
-  SoundEngine.playPon(); // ポン音再生
+  SoundEngine.playPon();
   document.getElementById('action-bar').style.display = 'none';
   gameState.isMenzen = false;
 
@@ -1064,18 +1160,17 @@ function executePon(tile) {
   gameState.playerMelds.push([tile, tile, tile]);
   
   gameState.isPlayerTurn = true;
-  document.getElementById('player-turn-status').innerText = 'ポンしました！ 手牌から不要な1枚を捨ててください';
+  document.getElementById('player-turn-status').innerText = 'ポンしました！ 不要な1枚を捨ててください';
   renderGame();
 }
 
-// アガリ処理
 function triggerWin(type, yakuText, scoreText, ronTile = null) {
   document.getElementById('action-bar').style.display = 'none';
 
   if (type === 'ロン') {
-    SoundEngine.playRon(); // ロン衝撃音 & 画面シェイク
+    SoundEngine.playRon();
   } else {
-    SoundEngine.playTsumo(); // ツモファンファーレ
+    SoundEngine.playTsumo();
   }
 
   const modal = document.getElementById('win-modal');
@@ -1098,7 +1193,7 @@ function closeModalAndRestart() {
   startNewGame();
 }
 
-// ==================== 図鑑 & フラッシュカードのデータ ====================
+// ==================== 図鑑 & フラッシュカード ====================
 const YAKU_CATALOG = [
   { name: '四暗刻 (スーアンコウ)', han: '役満', naki: false, desc: '自力で同じ牌3枚を4組集めてツモる最高峰の役満。', hand: ['m2','m2','m2', 'p4','p4','p4', 's6','s6','s6', 'z2','z2','z2', 'p9','p9'] },
   { name: '国士無双 (コクシムソウ)', han: '役満', naki: false, desc: '1・9・字牌の全13種を揃え、どれか1種をアタマにする究極役。', hand: ['m1','m9', 'p1','p9', 's1','s9', 'z1','z2','z3','z4','z5','z6','z7', 'z7'] },
